@@ -1,0 +1,17 @@
+min_version = "2026.10.17"
+
+[settings]
+lockfile = true
+
+[tool_config]
+locked = true
+
+[tools]
+swiftformat = "0"
+"github:ldomaradzki/xcsift" = "1"
+
+[tasks.format]
+run = "swiftformat App"
+
+[tasks."format:check"]
+run = "swiftformat --lint App"
