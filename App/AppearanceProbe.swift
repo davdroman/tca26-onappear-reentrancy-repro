@@ -6,7 +6,6 @@ final class AppearanceProbe: IssueReporter {
 	struct Snapshot {
 		var isInsideTrigger = false
 		var appearancesDuringTrigger = 0
-		var deferredActionsAfterTrigger = 0
 		var diagnostics: [String] = []
 		var hasTriggerAppearanceStack = false
 	}
@@ -30,18 +29,10 @@ final class AppearanceProbe: IssueReporter {
 		set { values.withLock { $0.isInsideTrigger = newValue } }
 	}
 
-	func recordAppearance() -> Bool {
+	func recordAppearance() {
 		values.withLock {
 			if $0.isInsideTrigger { $0.appearancesDuringTrigger += 1 }
-			return $0.isInsideTrigger
 		}
-	}
-
-	func recordDeferredAction() {
-		values.withLock {
-			if !$0.isInsideTrigger { $0.deferredActionsAfterTrigger += 1 }
-		}
-		onUpdate()
 	}
 
 	func reportIssue(

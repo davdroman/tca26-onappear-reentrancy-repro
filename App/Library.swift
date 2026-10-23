@@ -87,7 +87,7 @@ actor GuideRepository {
 	}
 
 	enum Action {
-		case guideAppeared(Int, wasDeferredFromTrigger: Bool)
+		case guideAppeared(Int)
 		case removeTapped(Int)
 	}
 
@@ -101,8 +101,7 @@ actor GuideRepository {
 	var body: some Feature {
 		Update { state, action in
 			switch action {
-			case let .guideAppeared(id, wasDeferredFromTrigger):
-				if wasDeferredFromTrigger { probe.recordDeferredAction() }
+			case let .guideAppeared(id):
 				guard
 					state.hasMore, !state.isLoading,
 					let guides = state.guides,
@@ -155,33 +154,23 @@ actor GuideRepository {
 struct LibraryView: View {
 	let store: StoreOf<Library>
 	let probe: AppearanceProbe
-	@State private var deferred = false
 
 	var body: some View {
 		NavigationStack {
-			VStack(spacing: 0) {
-				Picker("Appearance actions", selection: $deferred) {
-					Text("Synchronous").tag(false)
-					Text("Deferred control").tag(true)
+			GuideFeedView(store: store.spawn(\.feed), probe: probe)
+				.navigationTitle("Downloaded guides")
+				.toolbar {
+					Button("Restore samples") {
+						probe.reset()
+						store.send(.restoreSamplesTapped)
+					}
 				}
-				.pickerStyle(.segmented)
-				.padding()
-				GuideFeedView(store: store.spawn(\.feed), deferred: deferred, probe: probe)
-			}
-			.navigationTitle("Downloaded guides")
-			.toolbar {
-				Button("Restore samples") {
-					probe.reset()
-					store.send(.restoreSamplesTapped)
-				}
-			}
 		}
 	}
 }
 
 private struct GuideFeedView: View {
 	let store: StoreOf<GuideFeed>
-	let deferred: Bool
 	let probe: AppearanceProbe
 
 	var body: some View {
@@ -209,12 +198,8 @@ private struct GuideFeedView: View {
 							.padding()
 							.background(.quaternary, in: .rect(cornerRadius: 12))
 							.onAppear {
-								let insideTrigger = probe.recordAppearance()
-								if deferred {
-									Task { @MainActor in store.send(.guideAppeared(guide.id, wasDeferredFromTrigger: insideTrigger)) }
-								} else {
-									store.send(.guideAppeared(guide.id, wasDeferredFromTrigger: false))
-								}
+								probe.recordAppearance()
+								store.send(.guideAppeared(guide.id))
 							}
 						}
 						if !store.hasMore { Text("All guides loaded").padding() }

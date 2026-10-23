@@ -8,11 +8,10 @@ You need access to the TCA26 GitHub repository. Configure GitHub authentication 
 
 1. Open `OnAppearReentrancy.xcodeproj` in Xcode 27.1 with Swift 6.4.
 2. Select the **OnAppearReentrancy** scheme and an **iPhone 17** simulator with **iOS 27.0**. Run in **Debug**.
-3. Leave **Synchronous** selected and wait for **Downloaded guides** to finish loading. To start with the original data, tap **Restore samples** and wait for **Showing 12 of 60 downloads** and the list to settle.
+3. Wait for **Downloaded guides** to finish loading. Tap **Restore samples** and wait for the list to settle. In the verified simulator layout, appearance-driven pagination loads 24 records before scrolling, and the app displays **Showing 24 of 60 downloads**.
 4. Tap the first visible trash button, beside **Lisbon**, **Neighborhood walks**. The download disappears and the total decreases to 59. Expect one callback inside the trigger, one diagnostic, and a captured trigger + SwiftUI stack.
-5. Select **Deferred control**, tap **Restore samples**, and wait for the list to settle again. Remove the same download. Expect one callback inside the trigger, one deferred action afterward, and zero diagnostics.
 
-Counters reset on each removal and sample restore. To test pagination separately, scroll toward the end of the loaded rows to fetch another page. Restore samples before comparing the two modes.
+Counters reset on each removal and sample restore. To test pagination separately, scroll toward the end of the loaded rows to fetch another page. Restore samples and wait for the list to settle before repeating the removal.
 
 The app keeps IssueReporting's default runtime reporter and also displays counters. The diagnostic and captured stack are printed to the Xcode console:
 
@@ -28,13 +27,13 @@ Removing a download writes the file, animates local row removal, and posts an ev
 
 The captured warning occurs during the trigger's `guides = nil` mutation. Observation invalidation dispatches a SwiftUI row appearance, whose synchronous `Store.send` encounters the reentrancy check. The stack includes `OnTriggerModifier`, the `GuideFeed.State.guides` setter, `ObservationCenter.invalidate`, `_AppearanceActionModifier`, the row's `onAppear`, and `SpawnedCore.send`.
 
-The control changes only the appearance action's delivery to `Task { @MainActor in ... }`. A non-observable probe records callback entry during the trigger and action delivery after the trigger exits. The hosting controller persists throughout the reproduction, but the reload replaces the results list with a loading view. The app uses no forced layout, sleeps, or synthetic appearance callbacks.
+A non-observable probe records callback entry during the trigger. The hosting controller persists throughout the reproduction, but the reload replaces the results list with a loading view. The app uses no forced layout, sleeps, or synthetic appearance callbacks.
 
 ## Verified configuration
 
 - Xcode 27.1, Swift 6.4, iPhone 17 simulator, iOS 27.0 (`24A434`).
 - TCA26 pinned to `af4898ab7ae8f24caa1014c0b269d76be9e17182`, which includes #278's runtime diagnostic.
-- Three successive settled-list removals in synchronous mode each recorded one callback inside the trigger and one diagnostic. After restoring samples, the same three removals in deferred mode each recorded one callback inside the trigger, one action afterward, and zero diagnostics. Both sequences decreased the total from 60 to 57.
-- Scrolling loaded a second page, advancing the displayed count from 12 to 24 of 60 downloads.
+- Three successive settled-list removals each recorded one callback inside the trigger and one diagnostic, decreasing the total from 60 to 57.
+- The settled list loaded 24 records through appearance-driven pagination. After the three removals, scrolling loaded another page, advancing the displayed count from 24 to 36 of 57 downloads.
 
 These results cover the steps and simulator configuration above; other devices, OS versions, and scroll positions have not been established.
