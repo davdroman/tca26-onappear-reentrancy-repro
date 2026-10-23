@@ -1,0 +1,107 @@
+{
+  "build-independent-targets-in-parallel": false,
+  "default-configuration": "Release",
+  "configurations": [
+    "Debug",
+    "Release",
+  ],
+  "localizations": {
+    "development": "en",
+    "supported": [
+      "Base",
+    ],
+  },
+  "packages": [
+    {
+      "kind": "remote",
+      "repository": "https://github.com/pointfreeco/TCA26",
+      "version": {
+        "revision": "af4898ab7ae8f24caa1014c0b269d76be9e17182",
+      },
+    }, {
+      "kind": "remote",
+      "repository": "https://github.com/pointfreeco/swift-issue-reporting",
+      "version": {
+        "up-to-next-major-version": "2.1.0",
+      },
+    },
+  ],
+  "files": [
+    {
+      "kind": "folder",
+      "path": "App",
+      "target-membership": [
+        "OnAppearReentrancy",
+      ],
+      "membership-exceptions": [
+        {
+          "target": "OnAppearReentrancy",
+          "exclusions": [
+            "Info.plist",
+          ],
+        },
+      ],
+    }, {
+      "kind": "group",
+      "name": "Products",
+      "children": [
+        { "path": "<PRODUCTS>/OnAppearReentrancy.app", "id": "A00000000000000000000006", "type": "wrapper.application", "index": false },
+      ],
+    },
+  ],
+  "targets": [
+    {
+      "name": "OnAppearReentrancy",
+      "id": "A00000000000000000000005",
+      "product": "Products/OnAppearReentrancy.app",
+      "product-type": "application",
+      "build-phases": [
+        "compile-sources",
+        "frameworks",
+        "resources",
+      ],
+      "package-product-members": [
+        {
+          "package": "TCA26",
+          "product-name": "ComposableArchitecture",
+          "build-phase": { "build-phase": "frameworks" },
+        }, {
+          "package": "swift-issue-reporting",
+          "product-name": "IssueReporting",
+          "build-phase": { "build-phase": "frameworks" },
+        },
+      ],
+      "build-settings": {
+        "CODE_SIGN_STYLE": "Automatic",
+        "CURRENT_PROJECT_VERSION": "1",
+        "GENERATE_INFOPLIST_FILE": "YES",
+        "INFOPLIST_FILE": "App/Info.plist",
+        "INFOPLIST_KEY_CFBundleDisplayName": "onAppear Repro",
+        "MARKETING_VERSION": "1.0",
+        "PRODUCT_BUNDLE_IDENTIFIER": "mn.dro.tca26-onappear-reentrancy-repro",
+        "PRODUCT_NAME": "$(TARGET_NAME)",
+        "SUPPORTED_PLATFORMS": "iphoneos iphonesimulator",
+        "TARGETED_DEVICE_FAMILY": "1,2",
+      },
+    },
+  ],
+  "build-settings": {
+    "CLANG_ENABLE_MODULES": "YES",
+    "DEBUG_INFORMATION_FORMAT[config=Debug]": "dwarf",
+    "DEBUG_INFORMATION_FORMAT[config=Release]": "dwarf-with-dsym",
+    "ENABLE_TESTABILITY[config=Debug]": "YES",
+    "GCC_PREPROCESSOR_DEFINITIONS[config=Debug]": [
+      "DEBUG=1",
+      "$(inherited)",
+    ],
+    "IPHONEOS_DEPLOYMENT_TARGET": "26.0",
+    "ONLY_ACTIVE_ARCH[config=Debug]": "YES",
+    "SDKROOT": "iphoneos",
+    "SWIFT_ACTIVE_COMPILATION_CONDITIONS[config=Debug]": "DEBUG $(inherited)",
+    "SWIFT_COMPILATION_MODE[config=Release]": "wholemodule",
+    "SWIFT_OPTIMIZATION_LEVEL[config=Debug]": "-Onone",
+    "SWIFT_STRICT_CONCURRENCY": "complete",
+    "SWIFT_VERSION": "6.0",
+  },
+  "last-upgrade": "27.1",
+}
