@@ -43,9 +43,7 @@ final class ReproductionViewController: UIViewController {
 		guard let snapshot = probe?.snapshot else { return }
 		result.text = """
 		Callbacks inside trigger: \(snapshot.appearancesDuringTrigger)
-		Diagnostics: \(snapshot.diagnostics.count)
-		Trigger + SwiftUI stack: \(snapshot.hasTriggerAppearanceStack ? "captured" : "none")
+		Diagnostics: \(snapshot.diagnosticCount)
 		"""
-		print("[Reproduction] \(result.text ?? "")")
 	}
 }

@@ -1,4 +1,3 @@
-import Foundation
 import IssueReporting
 import Synchronization
 
@@ -6,8 +5,7 @@ final class AppearanceProbe: IssueReporter {
 	struct Snapshot {
 		var isInsideTrigger = false
 		var appearancesDuringTrigger = 0
-		var diagnostics: [String] = []
-		var hasTriggerAppearanceStack = false
+		var diagnosticCount = 0
 	}
 
 	private let values = Mutex(Snapshot())
@@ -43,18 +41,9 @@ final class AppearanceProbe: IssueReporter {
 		line: UInt,
 		column: UInt,
 	) {
-		let message = message() ?? "Unknown diagnostic"
-		let stack = Thread.callStackSymbols.joined(separator: "\n")
 		values.withLock {
-			$0.diagnostics.append(message)
-			$0.hasTriggerAppearanceStack = $0.hasTriggerAppearanceStack || (
-				$0.isInsideTrigger
-					&& stack.contains("OnTriggerModifier")
-					&& stack.contains("ObservationCenter")
-					&& stack.contains("AppearanceActionModifier")
-			)
+			$0.diagnosticCount += 1
 		}
-		print("[Reproduction] \(message)\n\(stack)")
 		onUpdate()
 	}
 }
