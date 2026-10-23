@@ -20,6 +20,11 @@ final class AppearanceProbe: IssueReporter {
 
 	var snapshot: Snapshot { values.withLock { $0 } }
 
+	func reset() {
+		values.withLock { $0 = Snapshot() }
+		onUpdate()
+	}
+
 	var isInsideTrigger: Bool {
 		get { values.withLock { $0.isInsideTrigger } }
 		set { values.withLock { $0.isInsideTrigger = newValue } }
